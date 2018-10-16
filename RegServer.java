@@ -13,12 +13,12 @@ import java.net.SocketAddress;
 
 //----------------------------------------------------------------------
 
-class EchoThread extends Thread
+class RegServerThread extends Thread
 {
    private Socket socket;
    private SocketAddress clientAddr;
 
-   public EchoThread(Socket socket, SocketAddress clientAddr)
+   public RegServerThread(Socket socket, SocketAddress clientAddr)
    {
       this.socket = socket;
       this.clientAddr = clientAddr;
@@ -55,13 +55,13 @@ class EchoThread extends Thread
 
 //----------------------------------------------------------------------
 
-public class EchoServerMult
+public class RegServer
 {
    public static void main(String[] args)
    {
       if (args.length != 1)
       {  
-         System.err.println("Usage: java EchoServerMult port");
+         System.err.println("Usage: java RegServer port");
          System.exit(1);
       }
 
@@ -79,8 +79,8 @@ public class EchoServerMult
 
             System.out.println("Accepted connection for " + clientAddr);
             System.out.println("Opened socket for " + clientAddr);
-            EchoThread echoThread = new EchoThread(socket, clientAddr);
-            echoThread.start();
+            RegServerThread regServerThread = new RegServerThread(socket, clientAddr);
+            regServerThread.start();
          }
       }
       catch (Exception e) { System.err.println(e); }
