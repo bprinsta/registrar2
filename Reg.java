@@ -151,14 +151,6 @@ public class Reg {
                 {
                     System.err.println(exc);
                 }
-
-
-                /* for(Map.Entry<String, ArrayList<Character>> entry : tempQueries.entrySet())
-                {
-                    System.out.print(entry.getKey());
-                    System.out.print(" " + entry.getValue());
-                    System.out.println();
-                } */
             }
             else
             {
