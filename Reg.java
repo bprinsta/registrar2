@@ -106,6 +106,10 @@ public class Reg {
         if (o instanceof ArrayList) 
         {
             courseBasics = (ArrayList<CourseStuff>) o;
+            for (CourseStuff c: courseBasics)
+            {
+                System.out.println(c.getCourseData());
+            }
         }
         else if (o instanceof String)
         {
@@ -146,7 +150,7 @@ public class Reg {
                     Object courseInput = ois.readObject();
                     takeInput(courseInput);
                     System.out.println("Retrieved Object");
-                    
+
                     socket.close();
                 }
                 catch (Exception exc)
