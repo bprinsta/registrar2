@@ -55,9 +55,18 @@ public class Reg {
             int portNumber = Integer.parseInt(args[1]); 
             Socket socket = new Socket(domainName, portNumber);
 
+            int i = 0;
             while (true)
             {
                 HashMap<String, ArrayList<Character>> queries =  runnable.returnTerms();
+
+                for(Map.Entry<String, ArrayList<Character>> entry : queries.entrySet())
+                {
+                    System.out.print(entry.getKey());
+                    System.out.print(" " + entry.getValue());
+                    System.out.println();
+                    System.out.println(i);
+                } 
 
                 OutputStream os = socket.getOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(os);
@@ -69,9 +78,9 @@ public class Reg {
                 Object courseInput = ois.readObject();
                 runnable.takeInput(courseInput);
 
+                i++;
             // store input in variable outside while loop
             // edit myrunnable to take input from regserver
-            // Classes[] classes = (Classes[])ois.readObject();
             }
 
            // socket.close();
@@ -86,7 +95,7 @@ public class Reg {
  class MyRunnable implements Runnable {
 
     private HashMap<String, ArrayList<Character>> tempQueries;
-    private ArrayList<String> courseBasics;
+    private ArrayList<CourseStuff> courseBasics;
     private String courseInfo;
 
     public MyRunnable()
@@ -103,10 +112,12 @@ public class Reg {
         if (o instanceof String) 
         {
             courseInfo = (String) o;
+            courseBasics = null;
         }
         else if (o instanceof ArrayList)
         {
-            courseBasics = (ArrayList<String>) o;
+            courseBasics = (ArrayList<CourseStuff>) o;
+            courseInfo = null;
         }
 
     }
@@ -134,12 +145,12 @@ public class Reg {
             char key = e.getKeyChar();
             if (key == KeyEvent.VK_ENTER)
             {
-                for(Map.Entry<String, ArrayList<Character>> entry : tempQueries.entrySet())
+                /* for(Map.Entry<String, ArrayList<Character>> entry : tempQueries.entrySet())
                 {
                     System.out.print(entry.getKey());
                     System.out.print(" " + entry.getValue());
                     System.out.println();
-                } 
+                } */
             }
             else
             {
@@ -245,14 +256,13 @@ public class Reg {
             scrollingListModel.addElement(chars.toArray().toString());
         } */
         
-        for (int i = 0; i < 5; i++)
+        if (courseBasics != null)
         {
-            scrollingListModel.addElement("9032	COS	233   ST   An Integrated, Quantitative Introduction to the Natural Sciences II");
-            scrollingListModel.addElement("9363	COS	314   QR   Computer and Electronic Music through Programming, Performance, and Composition");
-            scrollingListModel.addElement("8333	COS	598A	      Advanced Topics in Computer Science: Economic and Systems Design for Electronic Marketplaces");
-            scrollingListModel.addElement("8336	COS	598D	      Advanced Topics in Computer Science: Formal Methods in Networking");
+            for (CourseStuff c: courseBasics)
+            {
+                scrollingListModel.addElement(c.getCourseData());
+            }
         }
-
         JScrollPane listScrollPane = new JScrollPane(results);
         listboxArea.add(listScrollPane);
 

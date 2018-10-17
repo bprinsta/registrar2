@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 //----------------------------------------------------------------------
-class CourseStuff
+class CourseStuff implements Serializable
 {
     String classid;
     String classData;
@@ -34,6 +35,11 @@ class CourseStuff
     {
         this.classid = classID;
         this.classData = classData;
+    }
+
+    public String toString()
+    {
+        return classid + "\n" + classData + "\n";
     }
 
     public String getClassID()
@@ -338,7 +344,7 @@ class RegServerThread extends Thread
             oos.flush();
             System.out.println("Wrote courses to " + clientAddr);
 
-            socket.close();
+            //socket.close();
             System.out.println("Closed socket for " + clientAddr);
             System.out.println("Exiting thread for " + clientAddr);
         }
