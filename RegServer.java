@@ -52,6 +52,7 @@ class CourseStuff implements Serializable
         return classData;
     }
 }
+
 class RegServerThread extends Thread
 {
     private Socket socket;
@@ -296,72 +297,65 @@ class RegServerThread extends Thread
    {
         try
         {  
-            String[] inputs = {"-dept", "COS"}; 
-            //String[] inputs;
+            String[] inputs;
             ArrayList<String> list = new ArrayList<String>();
-            String classID = "9032";
+            String classID = "";
             HashMap<String, ArrayList<Character>> disgusting = new HashMap<String, ArrayList<Character>>();
 
             System.out.println("Spawned thread for " + clientAddr);
 
-            //while(!socket.isClosed())
+            InputStream inputStream = socket.getInputStream();
+            ObjectInputStream ois = new ObjectInputStream(inputStream);
+
+            OutputStream os = socket.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(os);
+
+            Object stuff = ois.readObject();
+
+            if (stuff instanceof String)
             {
-                InputStream inputStream = socket.getInputStream();
-                ObjectInputStream ois = new ObjectInputStream(inputStream);
+                classID = (String) stuff;
+                oos.writeObject(courseInfo(classID));
+            }
+            
+            else
+            {
+                disgusting = (HashMap<String, ArrayList<Character>>) stuff;
 
-                OutputStream os = socket.getOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(os);
-
-                Object stuff = ois.readObject();
-
-                if (stuff instanceof String)
+                for (Map.Entry<String, ArrayList<Character>> entry : disgusting.entrySet())
                 {
-                    classID = (String) stuff;
-                    oos.writeObject(courseInfo(classID));
-                }
-                
-                else
-                {
-                    disgusting = (HashMap<String, ArrayList<Character>>) stuff;
+                    String key = entry.getKey();
+                    ArrayList<Character> value = entry.getValue();
+                    char[] charValue = new char[value.toArray().length];
+                    int count = 0;
 
-                    for (Map.Entry<String, ArrayList<Character>> entry : disgusting.entrySet())
+                    for (Character c : value)
                     {
-                        String key = entry.getKey();
-                        ArrayList<Character> value = entry.getValue();
-                        char[] charValue = new char[value.toArray().length];
-                        int count = 0;
-
-                        for (Character c : value)
-                        {
-                            charValue[count] = c.charValue();
-                            count++;
-                        }
-
-                        if (!value.isEmpty())
-                        {
-                            System.out.println(key);
-                            System.out.println(new String(charValue));
-                            
-                            list.add(key);
-                            list.add(new String(charValue));
-                        }
+                        charValue[count] = c.charValue();
+                        count++;
                     }
 
-                    inputs = new String[list.size()];
-                    for (int i = 0; i < list.size(); i++)
+                    if (!value.isEmpty())
                     {
-                        inputs[i] = list.get(i);
+                        System.out.println(key);
+                        System.out.println(new String(charValue));
+                        
+                        list.add(key);
+                        list.add(new String(charValue));
                     }
-                    oos.writeObject(getCourseBasic(inputs));
                 }
 
-                
-                //oos.writeObject(courseInfo(classID));
-                //oos.writeObject(getCourseBasic(inputs));
-                oos.flush();
-                System.out.println("Wrote courses to " + clientAddr);
+                inputs = new String[list.size()];
+                for (int i = 0; i < list.size(); i++)
+                {
+                    inputs[i] = list.get(i);
+                }
+                oos.writeObject(getCourseBasic(inputs));
             }
 
+            oos.flush();
+            System.out.println("Wrote courses to " + clientAddr);
+            
             socket.close();
             System.out.println("Closed socket for " + clientAddr);
             System.out.println("Exiting thread for " + clientAddr);
