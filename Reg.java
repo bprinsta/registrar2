@@ -13,7 +13,11 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.FocusEvent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -83,11 +87,13 @@ public class Reg {
 
     private String domainName;
     private int portNumber;
+    DefaultListModel<String> scrollingListModel;
 
     public MyRunnable(String domain, int port)
     {
         this.domainName = domain;
         this.portNumber = port;
+        scrollingListModel = new DefaultListModel<String>();
 
         tempQueries = new HashMap<String, ArrayList<Character>>();
         tempQueries.put("-dept", new ArrayList<Character>());
@@ -105,10 +111,12 @@ public class Reg {
     {
         if (o instanceof ArrayList) 
         {
+            scrollingListModel.removeAllElements();
             courseBasics = (ArrayList<CourseStuff>) o;
             for (CourseStuff c: courseBasics)
             {
                 System.out.println(c.getCourseData());
+                scrollingListModel.addElement(c.getCourseData());
             }
         }
         else if (o instanceof String)
@@ -167,6 +175,51 @@ public class Reg {
                 else term.add(key);
                 tempQueries.put(this.field, term);
             }
+        }
+    }
+
+    private class listBoxListener implements KeyListener, FocusListener, MouseListener
+    {
+        public void mousePressed(MouseEvent event)
+        {
+            System.out.println("mousePressed");
+        }
+        public void mouseReleased(MouseEvent event)
+        {
+            System.out.println("mouseReleased");
+        }
+        public void mouseEntered(MouseEvent event)
+        {
+            System.out.println("mouseEntered");
+        }
+        public void mouseExited(MouseEvent event)
+        {
+            System.out.println("mouseExited");
+        }
+        public void mouseClicked(MouseEvent event)
+        {
+            System.out.println("mouseClicked");
+        }
+
+        public void focusGained(FocusEvent event)
+        {
+            System.out.println("focusGained");
+        }
+        public void focusLost(FocusEvent event)
+        {
+            System.out.println("focusLost");
+        }
+        public void keyPressed(KeyEvent event)
+        {
+            System.out.println("keyPressed");
+        }
+        public void keyReleased(KeyEvent event)
+        {
+            System.out.println("keyReleased");
+        }
+        public void keyTyped(KeyEvent event)
+        {
+            System.out.println("keyTyped");
         }
     }
 
@@ -248,7 +301,6 @@ public class Reg {
         // Add listbox to center of frame
         JPanel listboxArea = new JPanel();
         listboxArea.setLayout(new GridLayout(1, 1));
-        DefaultListModel<String> scrollingListModel = new DefaultListModel<String>();
         JList<String> results = new JList<String>(scrollingListModel);
         results.setFont(font);
 
