@@ -49,31 +49,32 @@ public class Reg {
         try
         {
             MyRunnable runnable = new MyRunnable();
-            
-           // while (true)
-            {
-                EventQueue.invokeLater(runnable);
-                HashMap<String, ArrayList<Character>> queries =  runnable.returnTerms();
+            EventQueue.invokeLater(runnable);
 
-                String domainName = args[0];
-                int portNumber = Integer.parseInt(args[1]); 
-                Socket socket = new Socket(domainName, portNumber);
+            String domainName = args[0];
+            int portNumber = Integer.parseInt(args[1]); 
+            Socket socket = new Socket(domainName, portNumber);
+
+            while (true)
+            {
+                HashMap<String, ArrayList<Character>> queries =  runnable.returnTerms();
 
                 OutputStream os = socket.getOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(os);
                 oos.writeObject(queries);
                 oos.flush();
             
-                
-            /*InputStream is = socket.getInputStream(); 
-            ObjectInputStream ois = new ObjectInputStream(is);
-            courseInput = ois.readObject(); */
+                InputStream is = socket.getInputStream(); 
+                ObjectInputStream ois = new ObjectInputStream(is);
+                Object courseInput = ois.readObject();
+                runnable.takeInput(courseInput);
 
             // store input in variable outside while loop
             // edit myrunnable to take input from regserver
             // Classes[] classes = (Classes[])ois.readObject();
-                socket.close();
             }
+
+           // socket.close();
         }
         catch (Exception e)
         {
@@ -97,18 +98,17 @@ public class Reg {
         tempQueries.put("-title", new ArrayList<Character>());
     }
 
-    public MyRunnable(Object input)
+    public void takeInput(Object o)
     {
-        if (input instanceof ArrayList)
+        if (o instanceof String) 
         {
-            courseBasics = (ArrayList<String>) input;
-            courseInfo = null;
+            courseInfo = (String) o;
         }
-        else if (input instanceof String)
+        else if (o instanceof ArrayList)
         {
-            courseBasics = null;
-            courseInfo = (String) input;
+            courseBasics = (ArrayList<String>) o;
         }
+
     }
     
     public HashMap<String, ArrayList<Character>> returnTerms()
