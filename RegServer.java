@@ -316,6 +316,8 @@ class RegServerThread extends Thread
             {
                 classID = (String) stuff;
                 oos.writeObject(courseInfo(classID));
+                oos.flush();
+                System.out.println("Wrote Detailed Course Info to " + clientAddr);
             }
             
             else
@@ -336,10 +338,7 @@ class RegServerThread extends Thread
                     }
 
                     if (!value.isEmpty())
-                    {
-                        System.out.println(key);
-                        System.out.println(new String(charValue));
-                        
+                    {                        
                         list.add(key);
                         list.add(new String(charValue));
                     }
@@ -351,14 +350,14 @@ class RegServerThread extends Thread
                     inputs[i] = list.get(i);
                 }
                 oos.writeObject(getCourseBasic(inputs));
+                oos.flush();
+                System.out.println("Wrote Basic Course Info to " + clientAddr);
             }
 
-            oos.flush();
-            System.out.println("Wrote courses to " + clientAddr);
-            
             socket.close();
             System.out.println("Closed socket for " + clientAddr);
             System.out.println("Exiting thread for " + clientAddr);
+            System.out.println();
         }
         catch (Exception e) { System.err.println(e); }
    }
