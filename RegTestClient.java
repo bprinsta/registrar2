@@ -29,14 +29,14 @@ public class RegTestClient
          ObjectInputStream ois = new ObjectInputStream(is);
 
          String courseInfo = (String) ois.readObject();
-         ArrayList<String> arrayObject = (ArrayList<String>) ois.readObject();
+         ArrayList<CourseStuff> arrayObject = (ArrayList<CourseStuff>) ois.readObject();
          socket.close();
 
          System.out.println(courseInfo);
 
-         for (String s : arrayObject)
+         for (CourseStuff s : arrayObject)
          {
-             System.out.println(s);
+             System.out.println(s.getCourseData());
          }
       }
       catch (Exception e) { System.err.println(e); }

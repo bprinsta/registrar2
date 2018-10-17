@@ -21,9 +21,31 @@ import java.sql.ResultSet;
 import java.io.File;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 //----------------------------------------------------------------------
+class CourseStuff
+{
+    String classid;
+    String classData;
 
+    public CourseStuff(String classID, String classData)
+    {
+        this.classid = classID;
+        this.classData = classData;
+    }
+
+    public String getClassID()
+    {
+        return classid;
+    }
+
+    public String getCourseData()
+    {
+        return classData;
+    }
+}
 class RegServerThread extends Thread
 {
     private Socket socket;
@@ -147,9 +169,9 @@ class RegServerThread extends Thread
         return null;
    }
 
-   public ArrayList<String> getCourseBasic(String[] inputs)
+   public ArrayList<CourseStuff> getCourseBasic(String[] inputs)
    {
-       ArrayList<String> output = new ArrayList<String>();
+       ArrayList<CourseStuff> output = new ArrayList<CourseStuff>();
 
        HashMap<String, Integer> map = new HashMap<String, Integer>();
        map.put(DEPT, 0);
@@ -237,6 +259,7 @@ class RegServerThread extends Thread
 
            while (resultSet.next())
            {
+               CourseStuff dataStructure;
                String lineOfOutput;
                String classid = resultSet.getString("classid");
                String dept = resultSet.getString("dept");
@@ -247,8 +270,8 @@ class RegServerThread extends Thread
                lineOfOutput = new String(classid + "\t" + dept + "\t" + coursenum + 
                "\t" + area + "\t" + title);
 
-               output.add(classid);
-               output.add(lineOfOutput.toString());
+               dataStructure = new CourseStuff(classid, lineOfOutput);
+               output.add(dataStructure);
            }
 
            connection.close();
@@ -267,30 +290,51 @@ class RegServerThread extends Thread
    {
         try
         {  
-            String[] inputs = {"-dept", "COS"}; 
+            //String[] inputs = {"-dept", "COS"}; 
+            String[] inputs;
+            ArrayList<String> list = new ArrayList<String>();
             String classID = "9032";
+            HashMap<String, ArrayList<Character>> disgusting = new HashMap<String, ArrayList<Character>>();
+
             System.out.println("Spawned thread for " + clientAddr);
 
-            //InputStream inputStream = socket.getInputStream();
-            //ObjectInputStream ois = new ObjectInputStream(inputStream);
+            InputStream inputStream = socket.getInputStream();
+            ObjectInputStream ois = new ObjectInputStream(inputStream);
 
             OutputStream os = socket.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(os);
 
-            //Object whateverTheFUckBenSends = ois.readObject();
+            Object stuff = ois.readObject();
 
-            //if (whateverTheFUckBenSends instanceof String)
+            if (stuff instanceof String)
             {
-                //classID = whateverTheFUckBenSends;
+                classID = (String) stuff;
+                oos.writeObject(courseInfo(classID));
             }
             
-            //else
+            else
             {
+                disgusting = (HashMap<String, ArrayList<Character>>) stuff;
 
+                for (Map.Entry<String, ArrayList<Character>> entry : disgusting.entrySet())
+                {
+                    String key = entry.getKey();
+                    ArrayList<Character> value = entry.getValue();
+                    if (!value.isEmpty())
+                    {
+                        list.add(key);
+                        list.add(Arrays.toString(value.toArray()));
+                    }
+                }
+
+                inputs = new String[list.size()];
+                for (int i = 0; i < list.size(); i++)
+                {
+                    inputs[i] = list.get(i);
+                }
+                oos.writeObject(getCourseBasic(inputs));
             }
 
-            oos.writeObject(courseInfo(classID));
-            oos.writeObject(getCourseBasic(inputs));
             oos.flush();
             System.out.println("Wrote courses to " + clientAddr);
 
