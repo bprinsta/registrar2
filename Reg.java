@@ -48,42 +48,11 @@ public class Reg {
         }
         try
         {
-            MyRunnable runnable = new MyRunnable();
-            EventQueue.invokeLater(runnable);
-
             String domainName = args[0];
             int portNumber = Integer.parseInt(args[1]); 
-            Socket socket = new Socket(domainName, portNumber);
 
-            int i = 0;
-            while (true)
-            {
-                HashMap<String, ArrayList<Character>> queries =  runnable.returnTerms();
-
-                for(Map.Entry<String, ArrayList<Character>> entry : queries.entrySet())
-                {
-                    System.out.print(entry.getKey());
-                    System.out.print(" " + entry.getValue());
-                    System.out.println();
-                    System.out.println(i);
-                } 
-
-                OutputStream os = socket.getOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(os);
-                oos.writeObject(queries);
-                oos.flush();
-            
-                InputStream is = socket.getInputStream(); 
-                ObjectInputStream ois = new ObjectInputStream(is);
-                Object courseInput = ois.readObject();
-                runnable.takeInput(courseInput);
-
-                i++;
-            // store input in variable outside while loop
-            // edit myrunnable to take input from regserver
-            }
-
-           // socket.close();
+            MyRunnable runnable = new MyRunnable(domainName, portNumber);
+            EventQueue.invokeLater(runnable);
         }
         catch (Exception e)
         {
@@ -98,33 +67,36 @@ public class Reg {
     private ArrayList<CourseStuff> courseBasics;
     private String courseInfo;
 
-    public MyRunnable()
+    private String domainName;
+    private int portNumber;
+
+    public MyRunnable(String domain, int port)
     {
+        this.domainName = domain;
+        this.portNumber = port;
+
         tempQueries = new HashMap<String, ArrayList<Character>>();
         tempQueries.put("-dept", new ArrayList<Character>());
         tempQueries.put("-coursenum", new ArrayList<Character>());
         tempQueries.put("-area", new ArrayList<Character>());
         tempQueries.put("-title", new ArrayList<Character>());
     }
-
-    public void takeInput(Object o)
-    {
-        if (o instanceof String) 
-        {
-            courseInfo = (String) o;
-            courseBasics = null;
-        }
-        else if (o instanceof ArrayList)
-        {
-            courseBasics = (ArrayList<CourseStuff>) o;
-            courseInfo = null;
-        }
-
-    }
     
     public HashMap<String, ArrayList<Character>> returnTerms()
     {
         return tempQueries;
+    }
+
+    private void takeInput(Object o)
+    {
+        if (o instanceof ArrayList) 
+        {
+            courseBasics = (ArrayList<CourseStuff>) o;
+        }
+        else if (o instanceof String)
+        {
+            courseInfo = (String) o;
+        }
     }
 
     private class TextFieldListener implements KeyListener
@@ -145,6 +117,28 @@ public class Reg {
             char key = e.getKeyChar();
             if (key == KeyEvent.VK_ENTER)
             {
+                try 
+                {
+                    Socket socket = new Socket(domainName, portNumber);
+                    
+                    OutputStream os = socket.getOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(os);
+                    oos.writeObject(tempQueries);
+                    oos.flush();
+                
+                    InputStream is = socket.getInputStream(); 
+                    ObjectInputStream ois = new ObjectInputStream(is);
+                    Object courseInput = ois.readObject();
+                    takeInput(courseInput);
+
+                    socket.close();
+                }
+                catch (Exception exc)
+                {
+                    System.err.println(exc);
+                }
+
+
                 /* for(Map.Entry<String, ArrayList<Character>> entry : tempQueries.entrySet())
                 {
                     System.out.print(entry.getKey());
@@ -155,16 +149,13 @@ public class Reg {
             else
             {
                 ArrayList<Character> term = tempQueries.get(this.field);
-                if (key == KeyEvent.VK_BACK_SPACE) 
-                {
+                if (key == KeyEvent.VK_BACK_SPACE) {
                     if(term.size() > 0) term.remove(term.size() - 1);
                 }
                 else term.add(key);
-
                 tempQueries.put(this.field, term);
             }
         }
- 
     }
 
     public void run() {
@@ -249,13 +240,7 @@ public class Reg {
         JList<String> results = new JList<String>(scrollingListModel);
         results.setFont(font);
 
-        
-       /* for(Map.Entry<String, ArrayList<Character>> entry : query.entrySet()) {
-            //String key = entry.getKey();
-            ArrayList<Character> chars = entry.getValue();
-            scrollingListModel.addElement(chars.toArray().toString());
-        } */
-        
+        // add courseBacics to scrollingListModel
         if (courseBasics != null)
         {
             for (CourseStuff c: courseBasics)
