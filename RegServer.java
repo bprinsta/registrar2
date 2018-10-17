@@ -266,6 +266,7 @@ class RegServerThread extends Thread
    {
         try
         {  
+            String[] inputs = {"-dept", "COS"};
             System.out.println("Spawned thread for " + clientAddr);
 
             //InputStream inputStream = socket.getInputStream();
@@ -277,6 +278,7 @@ class RegServerThread extends Thread
             //Object whateverTheFUckBenSends = ois.readObject();
 
             oos.writeObject(courseInfo("9032"));
+            oos.writeObject(getCourseBasic(inputs));
             oos.flush();
             System.out.println("Wrote courses to " + clientAddr);
 
