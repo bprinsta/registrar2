@@ -273,7 +273,7 @@ class RegServerThread extends Thread
                String area = resultSet.getString("area");
                String title = resultSet.getString("title");
 
-               lineOfOutput = String.format("%5s\t%3s\t%3s\t%3s\t%s", classid, dept, coursenum, 
+               lineOfOutput = String.format("%-30s\t%-30s\t%-30s\t%-30s\t%-30s", classid, dept, coursenum, 
                area, title);
 
                dataStructure = new CourseStuff(classid, lineOfOutput);
@@ -296,57 +296,62 @@ class RegServerThread extends Thread
    {
         try
         {  
-            //String[] inputs = {"-dept", "COS"}; 
-            String[] inputs;
+            String[] inputs = {"-dept", "COS"}; 
+            //String[] inputs;
             ArrayList<String> list = new ArrayList<String>();
             String classID = "9032";
             HashMap<String, ArrayList<Character>> disgusting = new HashMap<String, ArrayList<Character>>();
 
             System.out.println("Spawned thread for " + clientAddr);
 
-            InputStream inputStream = socket.getInputStream();
-            ObjectInputStream ois = new ObjectInputStream(inputStream);
-
-            OutputStream os = socket.getOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(os);
-
-            Object stuff = ois.readObject();
-
-            if (stuff instanceof String)
+            while(true)
             {
-                classID = (String) stuff;
-                oos.writeObject(courseInfo(classID));
-            }
-            
-            else
-            {
-                disgusting = (HashMap<String, ArrayList<Character>>) stuff;
+                InputStream inputStream = socket.getInputStream();
+                ObjectInputStream ois = new ObjectInputStream(inputStream);
 
-                for (Map.Entry<String, ArrayList<Character>> entry : disgusting.entrySet())
+                OutputStream os = socket.getOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(os);
+
+                Object stuff = ois.readObject();
+
+                if (stuff instanceof String)
                 {
-                    String key = entry.getKey();
-                    ArrayList<Character> value = entry.getValue();
-                    if (!value.isEmpty())
+                    classID = (String) stuff;
+                    oos.writeObject(courseInfo(classID));
+                }
+                
+                else
+                {
+                    disgusting = (HashMap<String, ArrayList<Character>>) stuff;
+
+                    for (Map.Entry<String, ArrayList<Character>> entry : disgusting.entrySet())
                     {
-                        list.add(key);
-                        list.add(Arrays.toString(value.toArray()));
+                        String key = entry.getKey();
+                        ArrayList<Character> value = entry.getValue();
+                        if (!value.isEmpty())
+                        {
+                            list.add(key);
+                            list.add(Arrays.toString(value.toArray()));
+                        }
                     }
+
+                    inputs = new String[list.size()];
+                    for (int i = 0; i < list.size(); i++)
+                    {
+                        inputs[i] = list.get(i);
+                    }
+                    oos.writeObject(getCourseBasic(inputs));
                 }
 
-                inputs = new String[list.size()];
-                for (int i = 0; i < list.size(); i++)
-                {
-                    inputs[i] = list.get(i);
-                }
+                oos.writeObject(courseInfo(classID));
                 oos.writeObject(getCourseBasic(inputs));
+                oos.flush();
+                System.out.println("Wrote courses to " + clientAddr);
             }
 
-            oos.flush();
-            System.out.println("Wrote courses to " + clientAddr);
-
-            socket.close();
-            System.out.println("Closed socket for " + clientAddr);
-            System.out.println("Exiting thread for " + clientAddr);
+            //socket.close();
+            //System.out.println("Closed socket for " + clientAddr);
+            //System.out.println("Exiting thread for " + clientAddr);
         }
         catch (Exception e) { System.err.println(e); }
    }
