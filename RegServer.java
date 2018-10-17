@@ -328,12 +328,22 @@ class RegServerThread extends Thread
                     {
                         String key = entry.getKey();
                         ArrayList<Character> value = entry.getValue();
+                        char[] charValue = new char[value.toArray().length];
+                        int count = 0;
+
+                        for (Object c : value.toArray())
+                        {
+                            charValue[count] = (char) c;
+                            count++;
+                        }
+
                         if (!value.isEmpty())
                         {
                             System.out.println(key);
-                            System.out.println(Arrays.toString(value.toArray()));
+                            System.out.println(new String(charValue));
+                            
                             list.add(key);
-                            list.add(Arrays.toString(value.toArray()));
+                            list.add(new String(charValue));
                         }
                     }
 
