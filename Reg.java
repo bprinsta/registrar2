@@ -48,9 +48,10 @@ public class Reg {
         }
         try
         {
-            while (true)
+            MyRunnable runnable = new MyRunnable();
+            
+           // while (true)
             {
-                MyRunnable runnable = new MyRunnable();
                 EventQueue.invokeLater(runnable);
                 HashMap<String, ArrayList<Character>> queries =  runnable.returnTerms();
 
@@ -62,12 +63,15 @@ public class Reg {
                 ObjectOutputStream oos = new ObjectOutputStream(os);
                 oos.writeObject(queries);
                 oos.flush();
+            
                 
-                InputStream is = socket.getInputStream(); 
-                ObjectInputStream ois = new ObjectInputStream(is);
-                
-                // store input in variable outside while loop
-                // Classes[] classes = (Classes[])ois.readObject();
+            /*InputStream is = socket.getInputStream(); 
+            ObjectInputStream ois = new ObjectInputStream(is);
+            courseInput = ois.readObject(); */
+
+            // store input in variable outside while loop
+            // edit myrunnable to take input from regserver
+            // Classes[] classes = (Classes[])ois.readObject();
                 socket.close();
             }
         }
@@ -81,6 +85,8 @@ public class Reg {
  class MyRunnable implements Runnable {
 
     private HashMap<String, ArrayList<Character>> tempQueries;
+    private ArrayList<String> courseBasics;
+    private String courseInfo;
 
     public MyRunnable()
     {
@@ -89,6 +95,20 @@ public class Reg {
         tempQueries.put("-coursenum", new ArrayList<Character>());
         tempQueries.put("-area", new ArrayList<Character>());
         tempQueries.put("-title", new ArrayList<Character>());
+    }
+
+    public MyRunnable(Object input)
+    {
+        if (input instanceof ArrayList)
+        {
+            courseBasics = (ArrayList<String>) input;
+            courseInfo = null;
+        }
+        else if (input instanceof String)
+        {
+            courseBasics = null;
+            courseInfo = (String) input;
+        }
     }
     
     public HashMap<String, ArrayList<Character>> returnTerms()
