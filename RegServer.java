@@ -331,9 +331,9 @@ class RegServerThread extends Thread
                         char[] charValue = new char[value.toArray().length];
                         int count = 0;
 
-                        for (Object c : value.toArray())
+                        for (Character c : value)
                         {
-                            charValue[count] = (char) c;
+                            charValue[count] = c.charValue();
                             count++;
                         }
 
