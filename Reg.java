@@ -139,12 +139,14 @@ public class Reg {
                     ObjectOutputStream oos = new ObjectOutputStream(os);
                     oos.writeObject(tempQueries);
                     oos.flush();
-                
+                    System.out.println("Flushed Object");
+
                     InputStream is = socket.getInputStream(); 
                     ObjectInputStream ois = new ObjectInputStream(is);
                     Object courseInput = ois.readObject();
                     takeInput(courseInput);
-
+                    System.out.println("Retrieved Object");
+                    
                     socket.close();
                 }
                 catch (Exception exc)
