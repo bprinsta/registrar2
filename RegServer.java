@@ -274,10 +274,14 @@ class RegServerThread extends Thread
                String title = resultSet.getString("title");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                lineOfOutput = new String(classid + "\t" + dept + "\t" + coursenum + 
                "\t" + area + "\t" + title);
 =======
                lineOfOutput = String.format("%-10s\t%-10s\t%-10s\t%-10s\t%-10s", classid, dept, coursenum, 
+=======
+               lineOfOutput = String.format("%-5s\t%-5s\t%-5s\t%-5s\t%-5s", classid, dept, coursenum, 
+>>>>>>> bb18d4c0ae2a8aac01f60987f625cf1dfc963277
                area, title);
 >>>>>>> 41e37225d0b686c9d05a9dcd8855ed762a60bf5d
 
