@@ -115,7 +115,6 @@ public class Reg {
             courseBasics = (ArrayList<CourseStuff>) o;
             for (CourseStuff c: courseBasics)
             {
-                System.out.println(c.getCourseData());
                 scrollingListModel.addElement(c.getCourseData());
             }
         }
@@ -211,11 +210,9 @@ public class Reg {
         }
         public void keyPressed(KeyEvent event)
         {
-            System.out.println("keyPressed");
         }
         public void keyReleased(KeyEvent event)
         {
-            System.out.println("keyReleased");
         }
         public void keyTyped(KeyEvent event)
         {
@@ -302,6 +299,9 @@ public class Reg {
         JPanel listboxArea = new JPanel();
         listboxArea.setLayout(new GridLayout(1, 1));
         JList<String> results = new JList<String>(scrollingListModel);
+        results.addKeyListener(new listBoxListener());
+        results.addFocusListener(new listBoxListener());
+        results.addMouseListener(new listBoxListener());
         results.setFont(font);
 
         // add courseBacics to scrollingListModel
