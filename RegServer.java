@@ -247,6 +247,7 @@ class RegServerThread extends Thread
                lineOfOutput = new String(classid + "\t" + dept + "\t" + coursenum + 
                "\t" + area + "\t" + title);
 
+               output.add(classid);
                output.add(lineOfOutput.toString());
            }
 
@@ -266,7 +267,8 @@ class RegServerThread extends Thread
    {
         try
         {  
-            String[] inputs = {"-dept", "COS"};
+            String[] inputs = {"-dept", "COS"}; 
+            String classID = "9032";
             System.out.println("Spawned thread for " + clientAddr);
 
             //InputStream inputStream = socket.getInputStream();
@@ -277,7 +279,17 @@ class RegServerThread extends Thread
 
             //Object whateverTheFUckBenSends = ois.readObject();
 
-            oos.writeObject(courseInfo("9032"));
+            //if (whateverTheFUckBenSends instanceof String)
+            {
+                //classID = whateverTheFUckBenSends;
+            }
+            
+            //else
+            {
+
+            }
+
+            oos.writeObject(courseInfo(classID));
             oos.writeObject(getCourseBasic(inputs));
             oos.flush();
             System.out.println("Wrote courses to " + clientAddr);
