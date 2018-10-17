@@ -304,7 +304,7 @@ class RegServerThread extends Thread
 
             System.out.println("Spawned thread for " + clientAddr);
 
-            while(true)
+            while(!socket.isClosed())
             {
                 InputStream inputStream = socket.getInputStream();
                 ObjectInputStream ois = new ObjectInputStream(inputStream);
@@ -343,15 +343,16 @@ class RegServerThread extends Thread
                     oos.writeObject(getCourseBasic(inputs));
                 }
 
-                oos.writeObject(courseInfo(classID));
-                oos.writeObject(getCourseBasic(inputs));
+                
+                //oos.writeObject(courseInfo(classID));
+                //oos.writeObject(getCourseBasic(inputs));
                 oos.flush();
                 System.out.println("Wrote courses to " + clientAddr);
             }
 
-            //socket.close();
-            //System.out.println("Closed socket for " + clientAddr);
-            //System.out.println("Exiting thread for " + clientAddr);
+            socket.close();
+            System.out.println("Closed socket for " + clientAddr);
+            System.out.println("Exiting thread for " + clientAddr);
         }
         catch (Exception e) { System.err.println(e); }
    }
