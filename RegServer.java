@@ -330,6 +330,7 @@ class RegServerThread extends Thread
                         ArrayList<Character> value = entry.getValue();
                         if (!value.isEmpty())
                         {
+                            System.out.println(key);
                             list.add(key);
                             list.add(Arrays.toString(value.toArray()));
                         }
