@@ -273,7 +273,7 @@ class RegServerThread extends Thread
                String area = resultSet.getString("area");
                String title = resultSet.getString("title");
 
-               lineOfOutput = String.format("%-30s\t%-30s\t%-30s\t%-30s\t%-30s", classid, dept, coursenum, 
+               lineOfOutput = String.format("%-10s\t%-10s\t%-10s\t%-10s\t%-10s", classid, dept, coursenum, 
                area, title);
 
                dataStructure = new CourseStuff(classid, lineOfOutput);
@@ -304,7 +304,7 @@ class RegServerThread extends Thread
 
             System.out.println("Spawned thread for " + clientAddr);
 
-            while(!socket.isClosed())
+            //while(!socket.isClosed())
             {
                 InputStream inputStream = socket.getInputStream();
                 ObjectInputStream ois = new ObjectInputStream(inputStream);
