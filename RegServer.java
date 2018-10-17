@@ -273,8 +273,8 @@ class RegServerThread extends Thread
                String area = resultSet.getString("area");
                String title = resultSet.getString("title");
 
-               lineOfOutput = new String(classid + "\t" + dept + "\t" + coursenum + 
-               "\t" + area + "\t" + title);
+               lineOfOutput = String.format("%5s\t%3s\t%3s\t%3s\t%s", classid, dept, coursenum, 
+               area, title);
 
                dataStructure = new CourseStuff(classid, lineOfOutput);
                output.add(dataStructure);
