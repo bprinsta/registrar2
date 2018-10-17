@@ -4,10 +4,13 @@
 //----------------------------------------------------------------------
 
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -17,13 +20,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.io.File;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 //----------------------------------------------------------------------
 
 class RegServerThread extends Thread
 {
-   private Socket socket;
-   private SocketAddress clientAddr;
+    private Socket socket;
+    private SocketAddress clientAddr;
+    private static final String DATABASE_NAME = "reg.sqlite";
+    private static final String DEPT = "dept";
+    private static final String COURSENUM = "coursenum";
+    private static final String AREA = "area";
+    private static final String TITLE = "title";
 
    public RegServerThread(Socket socket, SocketAddress clientAddr)
    {
@@ -35,8 +44,7 @@ class RegServerThread extends Thread
    {
        try
        {
-        final String DATABASE_NAME = "reg.sqlite";
-        String output = "";
+        StringBuilder output = new StringBuilder();
 
         File databaseFile = new File(DATABASE_NAME);
             if (! databaseFile.isFile())
@@ -45,7 +53,6 @@ class RegServerThread extends Thread
         if (!Pattern.matches("[0-9]*", classID))
         {
             System.err.println("regdetails: classid is not an integer");
-            System.exit(1);
         }
 
         Connection connection =
@@ -86,7 +93,6 @@ class RegServerThread extends Thread
             if (resultSet.isClosed())
             {
                 System.err.println("regdetails: classid does not exist");
-                System.exit(1);
             }
 
             String courseID = resultSet.getString("courseid");
@@ -100,36 +106,38 @@ class RegServerThread extends Thread
             String descrip = resultSet.getString("descrip");
             String prereqs = resultSet.getString("prereqs");
 
-            output += "\nCourse ID:\n" + courseID + "\n";    
-            output += "\nDays:\n" + days + "\n";
-            output += "\nStart Time:\n" + startTime + "\n";
-            output += "\nEnd Time:\n" + endTime + "\n";
-            output += "\nBuilding:\n" + bldg + "\n";
-            output += "\nRoom Number:\n" + roomNum + "\n";
+            output.append("\nCourse ID: " + courseID + "\n");    
+            output.append("\nDays: " + days + "\n");
+            output.append("\nStart Time: " + startTime + "\n");
+            output.append("\nEnd Time: " + endTime + "\n");
+            output.append("\nBuilding: " + bldg + "\n");
+            output.append("\nRoom Number: " + roomNum + "\n\n");
 
-            output += "\nDepartment and Course Number:\n";
+            
             while(resultSet2.next())
             {
                 String dept = resultSet2.getString("dept");
                 String courseNum = resultSet2.getString("coursenum");
 
-                output += dept + " ";
-                output += courseNum + "\n";
+                output.append("Department and Course Number: ");
+                output.append(dept + " ");
+                output.append(courseNum + "\n");
             }
             
-            output += "\nDistribution Area: (if applicable)\n" + area + "\n";
-            output += "\nTitle:\n" + title + "\n";
-            output += "\nDescription:\n" + descrip + "\n";
-            output += "\nPrerequisites:\n" + prereqs + "\n";
-            output += "\nProfessor Names:\n";
+            output.append("\nDistribution Area (if applicable): " + area + "\n");
+            output.append("\nTitle: " + title + "\n");
+            output.append("\nDescription: " + descrip + "\n");
+            output.append("\nPrerequisites: " + prereqs + "\n");
+            output.append("\nProfessor Names:");
             while(resultSet3.next())
             {
                 String profName = resultSet3.getString("profname");
-                output += profName + "\n";
+                output.append(" " + profName + ",");
             }
 
+            output.deleteCharAt(output.length() - 1);
             connection.close();
-            return output;
+            return output.toString();
         }
         catch (Exception e) 
         {
@@ -139,33 +147,144 @@ class RegServerThread extends Thread
         return null;
    }
 
+   public ArrayList<String> getCourseBasic(String[] inputs)
+   {
+       ArrayList<String> output = new ArrayList<String>();
+
+       HashMap<String, Integer> map = new HashMap<String, Integer>();
+       map.put(DEPT, 0);
+       map.put(COURSENUM, 0);
+       map.put(AREA, 0);
+       map.put(TITLE, 0);
+
+       // Identifies search queries
+       String whereString = new String();
+       
+       // Read in queries
+       for (int i = 0; i < inputs.length; i++)
+       {
+           String key = inputs[i].substring(1);
+           
+           // check validity of key
+           if (map.containsKey(key))
+           {
+               if (map.get(key) == 0) map.put(key, 1);
+               else 
+               {
+                   System.err.println("reg: duplicate key");
+                   System.exit(1);
+               }
+           }
+           else
+           {
+               System.err.println("reg: invalid key");
+               System.exit(1);
+           }
+           i++;
+
+           // checks for missing value
+           if (i >= inputs.length) 
+           {
+               System.err.println("reg: missing value");
+               System.exit(1);
+           }
+
+           String value = inputs[i];
+
+           if (key.equals(DEPT)) 
+           {
+               value = value.toUpperCase();
+               value = "\"" + value + "\"";
+               whereString += " AND " + key + " = " + value;
+           }
+           else if (key.equals(COURSENUM))
+           {
+               whereString += " AND " + key + " = " + value;
+           }
+           else if (key.equals(AREA))
+           {
+               value = value.toUpperCase();
+               value = "\"" + value + "\"";
+               whereString += " AND " + key + " = " + value;
+           }
+           else if (key.equals(TITLE))
+           {
+               value = "%" + value + "%";
+               value = "\"" + value + "\"";
+               whereString += " AND " + key + " LIKE " + value;
+           }
+       }
+
+       try
+       {
+           File databaseFile = new File(DATABASE_NAME);
+           if (!databaseFile.isFile())
+               throw new Exception("Database connection failed");
+
+           Connection connection = DriverManager.getConnection("jdbc:sqlite:" + DATABASE_NAME);
+
+           String stmtStr = "SELECT classid, dept, coursenum, area, title  " + 
+           "FROM courses, classes, crosslistings " +
+           "WHERE courses.courseid = crosslistings.courseid " +
+           "AND classes.courseid = courses.courseid " +
+           "AND classes.courseid = crosslistings.courseid " +
+           whereString.toString() +
+           " ORDER BY dept, coursenum, classid;";
+
+           PreparedStatement statement = connection.prepareStatement(stmtStr);
+
+           ResultSet resultSet = statement.executeQuery();
+
+           while (resultSet.next())
+           {
+               String lineOfOutput;
+               String classid = resultSet.getString("classid");
+               String dept = resultSet.getString("dept");
+               String coursenum = resultSet.getString("coursenum");
+               String area = resultSet.getString("area");
+               String title = resultSet.getString("title");
+
+               lineOfOutput = new String(classid + "\t" + dept + "\t" + coursenum + 
+               "\t" + area + "\t" + title);
+
+               output.add(lineOfOutput.toString());
+           }
+
+           connection.close();
+           return output;
+       }
+       catch (Exception e) 
+       { 
+           System.err.println("regdetails: database reg.sqlite not found"); 
+           System.exit(1);
+       }
+   
+       return null;
+   }
+
    public void run()
    {
-      try
-      {  
-         System.out.println("Spawned thread for " + clientAddr);
+        try
+        {  
+            System.out.println("Spawned thread for " + clientAddr);
 
-         InputStream inputStream = socket.getInputStream();
-         Scanner scanner = new Scanner(inputStream);
+            //InputStream inputStream = socket.getInputStream();
+            //ObjectInputStream ois = new ObjectInputStream(inputStream);
 
-         OutputStream os = socket.getOutputStream();
-         ObjectOutputStream oos = new ObjectOutputStream(os);
+            OutputStream os = socket.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(os);
 
-        // while (scanner.hasNextLine())
-         {
-         //   String line = scanner.nextLine();
-           // System.out.println("Read from " + clientAddr + ": " + line);
-         }
+            //Object whateverTheFUckBenSends = ois.readObject();
 
-         oos.writeObject(courseInfo("8321"));
-         oos.flush();
-         System.out.println("Wrote courses to " + clientAddr);
+            oos.writeObject(courseInfo("9032"));
+            oos.flush();
+            System.out.println("Wrote courses to " + clientAddr);
 
-         socket.close();
-         System.out.println("Closed socket for " + clientAddr);
-         System.out.println("Exiting thread for " + clientAddr);
-      }
-      catch (Exception e) { System.err.println(e); }
+            socket.close();
+            System.out.println("Closed socket for " + clientAddr);
+            System.out.println("Exiting thread for " + clientAddr);
+        }
+        catch (Exception e) { System.err.println(e); }
    }
 }
 

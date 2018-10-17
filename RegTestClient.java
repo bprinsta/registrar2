@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 // RegTestClient.java
-// Author: Bob Dondero
+// Author: Osita Ighodaro
 //----------------------------------------------------------------------
 
 import java.io.InputStream;
@@ -29,18 +29,9 @@ public class RegTestClient
          ObjectInputStream ois = new ObjectInputStream(is);
 
          String courseInfo = (String) ois.readObject();
-
          socket.close();
 
          System.out.println(courseInfo);
-
-         /*for (Course course : courses)
-            System.out.println(course);
-
-         courses[0].getBook().setPrice(99.99);
-
-         for (Course course : courses)
-            System.out.println(course); */
       }
       catch (Exception e) { System.err.println(e); }
    }
