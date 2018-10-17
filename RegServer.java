@@ -331,6 +331,7 @@ class RegServerThread extends Thread
                         if (!value.isEmpty())
                         {
                             System.out.println(key);
+                            System.out.println(Arrays.toString(value.toArray()));
                             list.add(key);
                             list.add(Arrays.toString(value.toArray()));
                         }
