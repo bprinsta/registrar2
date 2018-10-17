@@ -53,6 +53,20 @@ public class Reg {
 
             MyRunnable runnable = new MyRunnable(domainName, portNumber);
             EventQueue.invokeLater(runnable);
+
+            Socket socket = new Socket(domainName, portNumber);
+                    
+            OutputStream os = socket.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(os);
+            oos.writeObject(runnable.returnTerms());
+            oos.flush();
+                
+            InputStream is = socket.getInputStream(); 
+            ObjectInputStream ois = new ObjectInputStream(is);
+            Object courseInput = ois.readObject();
+            runnable.takeInput(courseInput);
+
+            socket.close();
         }
         catch (Exception e)
         {
@@ -87,7 +101,7 @@ public class Reg {
         return tempQueries;
     }
 
-    private void takeInput(Object o)
+    public void takeInput(Object o)
     {
         if (o instanceof ArrayList) 
         {
@@ -120,7 +134,7 @@ public class Reg {
                 try 
                 {
                     Socket socket = new Socket(domainName, portNumber);
-                    
+
                     OutputStream os = socket.getOutputStream();
                     ObjectOutputStream oos = new ObjectOutputStream(os);
                     oos.writeObject(tempQueries);
