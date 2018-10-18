@@ -157,7 +157,7 @@ class RegServerThread extends Thread
             output.append("\nTitle: " + title + "\n");
             output.append("\nDescription: " + descrip + "\n");
             output.append("\nPrerequisites: " + prereqs + "\n");
-            output.append("\nProfessor Names:");
+            output.append("\nProfessor Name(s):");
             while(resultSet3.next())
             {
                 String profName = resultSet3.getString("profname");
