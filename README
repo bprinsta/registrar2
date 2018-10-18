@@ -25,3 +25,7 @@ think that maybe a way to improve may to give guidelines on
 modularising the assignment we had already submitted. For example,
 I wasn't really sure what to modularise. I think it would help to
 have some idea about what would have been good.
+
+Our known bugs are that when you press on a certain class, the 
+window that pops up does not update the classid sent to the server,
+so the page only displays detailed info for one class.
