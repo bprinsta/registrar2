@@ -6,6 +6,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -50,6 +51,13 @@ public class Reg {
             System.err.println("Usage: java Reg.java host port");
             System.exit(1);
         }
+        
+        if (!Pattern.matches("[0-9]*", args[1]))
+        {
+            System.err.println("reg: port is not an integer");
+            System.exit(1);
+        }
+
         try
         {
             String domainName = args[0];

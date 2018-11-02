@@ -367,30 +367,36 @@ public class RegServer
 {
    public static void main(String[] args)
    {
-      if (args.length != 1)
-      {  
-         System.err.println("Usage: java RegServer port");
-         System.exit(1);
-      }
+        if (args.length != 1)
+        {  
+            System.err.println("Usage: java RegServer port");
+            System.exit(1);
+        }
+      
+        if (!Pattern.matches("[0-9]*", args[0]))
+        {
+            System.err.println("regserver: port is not an integer");
+            System.exit(1);
+        }
 
-      try
-      {  
-         int port = Integer.parseInt(args[0]);
+        try
+        {  
+            int port = Integer.parseInt(args[0]);
 
-         ServerSocket serverSocket = new ServerSocket(port);
-         System.out.println("Opened server socket");
-         
-         while (true)
-         {  
-            Socket socket = serverSocket.accept();
-            SocketAddress clientAddr = socket.getRemoteSocketAddress();
+            ServerSocket serverSocket = new ServerSocket(port);
+            System.out.println("Opened server socket");
+            
+            while (true)
+            {  
+                Socket socket = serverSocket.accept();
+                SocketAddress clientAddr = socket.getRemoteSocketAddress();
 
-            System.out.println("Accepted connection for " + clientAddr);
-            System.out.println("Opened socket for " + clientAddr);
-            RegServerThread regServerThread = new RegServerThread(socket, clientAddr);
-            regServerThread.start();
-         }
-      }
-      catch (Exception e) { System.err.println(e); }
+                System.out.println("Accepted connection for " + clientAddr);
+                System.out.println("Opened socket for " + clientAddr);
+                RegServerThread regServerThread = new RegServerThread(socket, clientAddr);
+                regServerThread.start();
+            }
+        }
+        catch (Exception e) { System.err.println(e); }
    }
 }
