@@ -170,8 +170,8 @@ class RegServerThread extends Thread
         }
         catch (Exception e) 
         {
+            System.err.println(e);
             System.err.println("regdetails: database reg.sqlite not found");
-            System.exit(1); 
         }
         return null;
    }
@@ -286,8 +286,8 @@ class RegServerThread extends Thread
        }
        catch (Exception e) 
        { 
-           System.err.println("regdetails: database reg.sqlite not found"); 
-           System.exit(1);
+           System.err.println(e);
+           System.err.println("regdetails: database reg.sqlite not found");
        }
    
        return null;
